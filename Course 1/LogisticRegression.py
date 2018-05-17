@@ -2,13 +2,13 @@ import numpy as np
 import h5py
 
 def load_dataset():
-    train_dataset = h5py.File('C:/Users/Ranjith/PycharmProjects/PyPractice/train_catvnoncat.h5', "r")
-    train_set_x_orig = np.array(train_dataset["train_set_x"][:])  # your train set features
-    train_set_y_orig = np.array(train_dataset["train_set_y"][:])  # your train set labels
+    train_dataset = h5py.File('Deep-Learning/Datasets/train_catvnoncat.h5', "r") # edit path as per location of .h5 file
+    train_set_x_orig = np.array(train_dataset["train_set_x"][:])  # training set features
+    train_set_y_orig = np.array(train_dataset["train_set_y"][:])  # training set labels
 
-    test_dataset = h5py.File('C:/Users/Ranjith/PycharmProjects/PyPractice/test_catvnoncat.h5', "r")
-    test_set_x_orig = np.array(test_dataset["test_set_x"][:])  # your test set features
-    test_set_y_orig = np.array(test_dataset["test_set_y"][:])  # your test set labels
+    test_dataset = h5py.File('Deep-Learning/Datasets/test_catvnoncat.h5', "r") # edit path as per location of .h5 file
+    test_set_x_orig = np.array(test_dataset["test_set_x"][:])  # test set features
+    test_set_y_orig = np.array(test_dataset["test_set_y"][:])  # test set labels
 
     classes = np.array(test_dataset["list_classes"][:])  # the list of classes
 
@@ -23,14 +23,15 @@ m_train = train_set_x_orig.shape[0]
 m_test = test_set_x_orig.shape[0]
 num_px = train_set_x_orig.shape[1]
 
-#PRE-PROCESSING the datasets
+# pre-process the datasets
 train_set_x_flatten = train_set_x_orig.reshape(train_set_x_orig.shape[0], -1).T
 test_set_x_flatten = test_set_x_orig.reshape(test_set_x_orig.shape[0], -1).T
 
+# standardize the image dataset by dividing every row by 255 (max pixel value)
 train_set_x = train_set_x_flatten/255.
 test_set_x = test_set_x_flatten/255.
 
-
+# sigmoid function
 def sigmoid(z):
 
     s = 1/(1+np.exp(-z))
@@ -46,11 +47,12 @@ def initialize_parameters(dim):
 
     return w, b
 
+# forward and backward propogation yields the parameter changes dw and db
 def propagate(w, b, X, Y):
 
     m = X.shape[1]
 
-    A = sigmoid(np.dot(w.T, X) + b)
+    A = sigmoid(np.dot(w.T, X) + b)                         # sigmoid activation function for 0 hidden layer binary classification
     cost = (-1/m)*np.sum(Y*np.log(A)+((1-Y)*np.log(1-A)))
 
     dw = (1/m)*np.dot(X, (A-Y).T)
@@ -63,6 +65,7 @@ def propagate(w, b, X, Y):
 
     return grads, cost
 
+#training the model in order to minimize the cost function and finding optimal values for w and b parameters
 def optimize(w, b, X, Y, num_iterations, learning_rate, print_cost = False):
 
     costs = []
@@ -88,6 +91,7 @@ def optimize(w, b, X, Y, num_iterations, learning_rate, print_cost = False):
 
     return params, grads, costs
 
+# prediction function
 def predict(w, b, X):
 
     m = X.shape[1]
