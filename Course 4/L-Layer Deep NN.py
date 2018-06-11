@@ -2,15 +2,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 import h5py
 import scipy
+import json
 from scipy import ndimage
-from dnn_utils_v2 import sigmoid, relu, sigmoid_backward, relu_backward
+from dnn_app_utils_v2 import sigmoid, relu, sigmoid_backward, relu_backward
 
 def load_dataset():
-    train_dataset = h5py.File('Deep-Learning/Datasets/train_catvnoncat.h5', "r")
+    train_dataset = h5py.File('C:/Users/Ranjith/PycharmProjects/DeepLearning/train_catvnoncat.h5', "r")
     train_set_x_orig = np.array(train_dataset["train_set_x"][:])  # your train set features
     train_set_y_orig = np.array(train_dataset["train_set_y"][:])  # your train set labels
 
-    test_dataset = h5py.File('Deep-Learning/Datasets/test_catvnoncat.h5', "r")
+    test_dataset = h5py.File('C:/Users/Ranjith/PycharmProjects/DeepLearning/test_catvnoncat.h5', "r")
     test_set_x_orig = np.array(test_dataset["test_set_x"][:])  # your test set features
     test_set_y_orig = np.array(test_dataset["test_set_y"][:])  # your test set labels
 
@@ -26,8 +27,6 @@ train_set_x_orig, train_set_y, test_set_x_orig, test_set_y, classes = load_datas
 m_train = train_set_x_orig.shape[0]
 m_test = test_set_x_orig.shape[0]
 num_px = train_set_x_orig.shape[1]
-
-
 
 #PRE-PROCESSING the datasets
 train_set_x_flatten = train_set_x_orig.reshape(train_set_x_orig.shape[0], -1).T
@@ -85,8 +84,7 @@ def L_model_forward(X, parameters):
 
     for l in range(1, L):
         A_prev = A
-        A, cache = linear_activation_forward(A_prev, parameters['W' + str(l)], parameters['b' + str(l)],
-                                             activation="relu")
+        A, cache = linear_activation_forward(A_prev, parameters['W' + str(l)], parameters['b' + str(l)], activation="relu")
         caches.append(cache)
 
     AL, cache = linear_activation_forward(A, parameters['W' + str(L)], parameters['b' + str(L)], activation="sigmoid")
@@ -104,6 +102,7 @@ def compute_cost(AL, Y):
     cost = (1. / m) * (-np.dot(Y, np.log(AL).T) - np.dot(1 - Y, np.log(1 - AL).T))
 
     cost = np.squeeze(cost)  # To make sure your cost's shape is what we expect (e.g. this turns [[17]] into 17).
+
     assert (cost.shape == ())
 
     return cost
@@ -172,7 +171,6 @@ def update_parameters(parameters, grads, learning_rate):
 
     return parameters
 
-
 def predict(X, y, parameters):
 
     m = X.shape[1]
@@ -216,16 +214,19 @@ def L_layer_model(X, Y, layers_dims, learning_rate=0.0075, num_iterations=3000, 
     return parameters
 
 layers_dims = [12288, 20, 7, 5, 1] #  4-layer model
-parameters = L_layer_model(train_set_x, train_set_y, layers_dims, num_iterations = 2500, print_cost = False)
+parameters = L_layer_model(train_set_x, train_set_y, layers_dims, num_iterations=2500, print_cost=True)
+# np.set_printoptions(threshold=np.nan)
 
-my_image = "c5.jpg" # change this to the name of your image file
-my_label_y = [1] # the true class of your image (1 -> cat, 0 -> non-cat)
+#Export the parameters to a file. Saves time and don't have to run the NN over and over again
 
-fname = "C:/Users/Ranjith/Desktop/ROS and AI/Cats and Non-Cats/" + my_image
-image = np.array(ndimage.imread(fname, flatten=False))
-my_image = scipy.misc.imresize(image, size=(num_px,num_px)).reshape((num_px*num_px*3,1))
-my_image = my_image/255.
-my_predicted_image = predict(my_image, my_label_y, parameters)
+np.savetxt('W1.txt',parameters['W1'])
+np.savetxt('b1.txt',parameters['b1'])
+np.savetxt('W2.txt',parameters['W2'])
+np.savetxt('b2.txt',parameters['b2'])
+np.savetxt('W3.txt',parameters['W3'])
+np.savetxt('b3.txt',parameters['b3'])
+np.savetxt('W4.txt',parameters['W4'])
+np.savetxt('b4.txt',parameters['b4'])
 
-#train_predict = predict(train_set_x, train_set_y, parameters)
-#test_predict = predict(test_set_x, test_set_y, parameters)
+# train_predict = predict(train_set_x, train_set_y, parameters)
+# test_predict = predict(test_set_x, test_set_y, parameters)
